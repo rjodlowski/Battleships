@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            var t = ["a", "b", "c", "d", "e"];
+            var f = function (ii) {
+                return function () {
+                    alert(ii);
+                }
+            }
+            for (var i = 0; i < 5; i++) { //let
+                var el = document.createElement("button");
+                el.innerText = t[i];
+                /*el.onclick=function(){
+                    alert(i);
+                }*/
+                el.onclick = f(i);
+                document.body.appendChild(el);
+            }
+        });       
+    </script>
+</head>
+
+<body onload="">
+
+    <script></script>
+</body>
+
+</html>

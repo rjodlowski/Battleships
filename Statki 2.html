@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statki cz.2 RJ</title>
+    <style>
+        #game {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            padding-bottom: 1px;
+        }
+
+        #availableShips {
+            width: 300px;
+            height: 620px;
+            margin-right: 50px;
+        }
+
+        .avShip {
+            display: flex;
+            flex-direction: row;
+            width: fit-content;
+            height: 40px;
+            margin: 20px;
+            cursor: pointer;
+        }
+
+        .avShipCell {
+            height: 40px;
+            width: 40px;
+            outline: 1px solid black;
+            margin-right: 1px;
+        }
+
+        #player {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #title {
+            font-size: 30px;
+            padding: 10px;
+        }
+
+
+        #playerBoard {
+            width: 400px;
+            height: 405px;
+            cursor: default;
+            padding-top: 2px;
+        }
+
+        #playerBoard>div {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: none;
+            margin-top: -3px;
+            outline: 1px solid black;
+            cursor: pointer;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game">
+        <div id="availableShips">
+            <!-- div of available ships -->
+        </div>
+        <div id="player">
+            <div id="title">Gracz</div>
+            <div id="playerBoard" oncontextmenu="return false"></div>
+        </div>
+    </div>
+    <script>
+        const _availableShips = document.getElementById("availableShips");
+        const _gameBoardPDiv = document.getElementById("playerBoard");
+        var selectedShip = 4;
+        var shipGizmoOrientation = "horizontal";
+
+        // Creating a game board for a player
+        var gameBoardP = [];
+        for (let y = 0; y < 10; y++) {
+            gameBoardP[y] = []
+            for (let x = 0; x < 10; x++) {
+                gameBoardP[y][x] = 0;
+            }
+        }
+
+        // Declaring avaialble ships
+        var ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+
+        // availableShips behaviour
+
+        // Creating available ships
+        for (let currShip of ships) {
+
+            // Create ship div
+            let _avShip = document.createElement("div");
+            _avShip.className = "avShip";
+
+            // Create ship cell & append to ship div
+            for (let currShipLen = currShip; currShipLen > 0; currShipLen--) {
+                let cell = document.createElement("div");
+                cell.className = "avShipCell";
+                _avShip.appendChild(cell);
+            }
+
+            // Add event liseteners (mouseover, mouseout, click)
+            _avShip.addEventListener("mouseover", redBackround);
+            _avShip.addEventListener("mouseout", whiteBackround);
+            _avShip.addEventListener("click", clicked);
+
+            document.getElementById("availableShips").appendChild(_avShip)
+        }
+        defaultShipBlue()
+
+        // Set default element blue (clicked)
+        function defaultShipBlue() {
+            _availableShips.children[0].style.backgroundColor = "blue"
+            _availableShips.children[0].removeEventListener("mouseover", redBackround)
+            _availableShips.children[0].removeEventListener("mouseout", whiteBackround)
+        }
+
+        // avShips functions
+        function redBackround() {
+            this.style.backgroundColor = "red";
+        }
+
+        function whiteBackround() {
+            this.style.backgroundColor = "white";
+        }
+
+        function clicked() {
+            // Set clicked element "clicked"
+
+            // Add standard event listeners
+            for (let x = 0; x < _availableShips.childElementCount; x++) {
+                _availableShips.children[x].style.backgroundColor = "white"
+                _availableShips.children[x].addEventListener("mouseover", redBackround)
+                _availableShips.children[x].addEventListener("mouseout", whiteBackround)
+            }
+
+            // Remove mouseover & mouseout listener
+            this.style.backgroundColor = "blue";
+            this.removeEventListener("mouseover", redBackround);
+            this.removeEventListener("mouseout", whiteBackround);
+
+            selectedShip = this.childElementCount;
+        }
+
+        // playerBoard behaviour
+
+        // Printing playerBoard in the document
+        for (let x = 0; x < 100; x++) {
+            var field = document.createElement("div")
+            field.addEventListener("mouseover", shipVisualizationOn)
+            field.addEventListener("mouseout", shipVisualizationOff)
+            field.addEventListener("contextmenu", setGizmoOrinetation)
+            field.addEventListener("click", setShipLocation)
+            field.id = `field${x + 1}`
+            _gameBoardPDiv.appendChild(field);
+        }
+
+        // Draw ship gizmo
+        function shipVisualizationOn(event) {
+            shipVisualizationOff();
+            var color = checkSpace();
+
+            // Get index of a child
+            var childIndex = parseInt(event.target.id.substring(5))
+
+            if (shipGizmoOrientation == "horizontal") {
+                // Draw gizmos
+                var shipGizmoFitsH = (childIndex + selectedShip) % 10
+                if (shipGizmoFitsH <= selectedShip && shipGizmoFitsH > 0) {
+                    for (let x = 0; x < selectedShip; x++) {
+                        document.getElementById(`field${childIndex + x - shipGizmoFitsH + 1}`).style.backgroundColor = color;
+                    }
+                } else {
+                    for (let x = 0; x < selectedShip; x++) {
+                        document.getElementById(`field${childIndex + x}`).style.backgroundColor = color;
+                    }
+                }
+            } else  /*shipGizmoOrientation == "vertical" */ {
+                var shipGizmoFitsV = Math.ceil(childIndex / 10) + selectedShip - 1
+
+                if (shipGizmoFitsV >= 10) {
+                    for (let x = 0; x < selectedShip * 10; x += 10) {
+                        document.getElementById(`field${childIndex - (shipGizmoFitsV % 10) * 10 + x}`).style.backgroundColor = color;
+                    }
+                } else {
+                    for (let x = 0; x < selectedShip * 10; x += 10) {
+                        document.getElementById(`field${childIndex + x}`).style.backgroundColor = color;
+                    }
+                }
+            }
+        }
+
+        // Get clicked point's int indexes in table
+        function getGizmoLocation() {
+            var childIndexClick = event.target.id.substring(5)
+            let locationY;
+            let locationX;
+
+            if (childIndexClick.length == 1) {
+                childIndexClick = "0" + childIndexClick;
+            }
+
+            if (childIndexClick.length == 3) {
+                locationX = 9
+                locationY = 9
+            } else if (childIndexClick[0] == "1" && childIndexClick[1] == "0") {
+                locationY = 0;
+                locationX = 9;
+            } else if (childIndexClick[0] == "0") {
+                locationY = parseInt(childIndexClick[0])
+                locationX = parseInt(childIndexClick[1]) - 1
+            } else if (childIndexClick[1] == "0") {
+                locationY = parseInt(childIndexClick[0]) - 1
+                locationX = 9;
+            } else {
+                locationY = parseInt(childIndexClick[0])
+                locationX = parseInt(childIndexClick[1]) - 1
+            }
+
+            // Ship location
+            var location = { y: locationY, x: locationX }
+
+            return location
+        }
+
+        // convert array locations (Y, X) to div id (XY - string)
+        function arrayToDivTable(location) {
+            positionY = location.y.toString();
+
+            positionX = (location.x + 1).toString();
+            if (positionX == "10") {
+                positionX = "0"
+                positionY = (parseInt(positionY) + 1).toString()
+            }
+            positionY == "0" ? positionY = "" : 0
+
+            return positionY + positionX;
+        }
+
+        // Check if ship can fit
+        function checkSpace() {
+            var color;
+
+            // Get gizmo location
+            var location = getGizmoLocation();
+
+            if (shipGizmoOrientation == "horizontal") {
+                if (location.x + selectedShip >= gameBoardP.length) {
+                    for (let y = location.y - 1; y < location.y + 2 && y < gameBoardP.length; y++) {
+                        y < 0 ? y = 0 : 0
+                        for (let x = gameBoardP.length - selectedShip - 1; x < gameBoardP.length; x++) {
+                            if (gameBoardP[y][x] == 1) {
+                                color = "red"
+                                return color;
+                            } else {
+                                color = "green"
+                            }
+                        }
+                    }
+                    return color
+                } else {
+                    for (let y = location.y - 1; y < location.y + 2 && y < gameBoardP.length; y++) {
+                        // Upper edge
+                        y < 0 ? y = 0 : 0
+                        for (let x = location.x - 1; x < location.x + selectedShip + 1 && x < gameBoardP.length; x++) {
+                            // Left edge 
+                            x < 0 ? x = 0 : 0
+                            if (gameBoardP[y][x] == 1) {
+                                color = "red"
+                                return color;
+                            } else {
+                                color = "green"
+                            }
+                        }
+                    }
+                    return color;
+                }
+            } else  /*shipGizmoOrientation == "vertical" */ {
+                if (location.y + selectedShip >= gameBoardP.length) {
+                    for (let y = gameBoardP.length - selectedShip - 1; y < gameBoardP.length; y++) {
+                        for (let x = location.x - 1; x < location.x + 2 && x < gameBoardP.length; x++) {
+                            // Left edge 
+                            x < 0 ? x = 0 : 0
+                            if (gameBoardP[y][x] == 1) {
+                                color = "red"
+                                return color
+                            } else {
+                                color = "green"
+                            }
+                        }
+                    }
+                    return color;
+                } else {
+                    for (let y = location.y - 1; y < location.y + selectedShip + 1 && y < gameBoardP.length; y++) {
+                        // Upper edge
+                        y < 0 ? y = 0 : 0
+                        for (let x = location.x - 1; x < location.x + 2 && x < gameBoardP.length; x++) {
+                            // Left edge 
+                            x < 0 ? x = 0 : 0
+                            if (gameBoardP[y][x] == 1) {
+                                color = "red"
+                                return color
+                            } else {
+                                color = "green"
+                            }
+                        }
+                    }
+                    return color;
+                }
+            }
+        }
+
+        function shipVisualizationOff() {
+            // Color all fields white
+            for (let x = 0; x < _gameBoardPDiv.childElementCount; x++) {
+                if (document.getElementById(`field${x + 1}`).getAttribute("ship") == 1) {
+                    document.getElementById(`field${x + 1}`).style.backgroundColor = "blue"
+                } else {
+                    document.getElementById(`field${x + 1}`).style.backgroundColor = "white";
+                }
+            }
+        }
+
+        // Reverse shipGizmoOrientation
+        function setGizmoOrinetation() {
+            if (shipGizmoOrientation == "horizontal") {
+                shipGizmoOrientation = "vertical";
+            } else {
+                shipGizmoOrientation = "horizontal";
+            }
+            shipVisualizationOn(event)
+        }
+
+        // Write ship to table 
+        function setShipLocation(event) {
+            var location = getGizmoLocation();
+            var color = checkSpace()
+            var canFitUserShip;
+
+            color == "red" ? canFitUserShip = false : canFitUserShip = true;
+
+            if (canFitUserShip && shipGizmoOrientation == "horizontal") {
+                // When ship near right edge
+                if (location.x + selectedShip - 1 >= 9) {
+                    let counter = 1
+                    for (let x = gameBoardP.length - selectedShip; x < gameBoardP.length; x++) {
+                        gameBoardP[location.y][x] = 1;
+                        let divToChangeId = (Math.ceil(parseInt(arrayToDivTable(getGizmoLocation())) / 10) * 10 - selectedShip + counter).toString();
+                        let divToChange = document.getElementById(`field${divToChangeId}`)
+
+                        divToChange.setAttribute("ship", 1)
+
+                        counter++
+                    }
+                } else {
+                    // for normal ship positions
+                    for (let x = location.x; x < location.x + selectedShip; x++) {
+                        gameBoardP[location.y][x] = 1;
+                        let divToChangeId = arrayToDivTable(getGizmoLocation())
+                        let divToChange = document.getElementById(`field${parseInt(divToChangeId) + (x - location.x)}`)
+                        divToChange.setAttribute("ship", 1)
+                    }
+                }
+                if (color == "green") {
+                    // Remove ship from avShips
+                    for (let x = 0; x < _availableShips.childElementCount; x++) {
+                        if (_availableShips.children[x].style.backgroundColor == "blue") {
+                            _availableShips.children[x].remove()
+                        }
+                    }
+                    selectedShip = 0;
+                    shipVisualizationOff()
+                } else {
+                    shipVisualizationOn()
+                }
+            } else if (canFitUserShip && shipGizmoOrientation == "vertical") {
+                let counter = 0
+                // When ship near bottom edge 
+                if (location.y + selectedShip - 1 >= 9) {
+                    for (let y = gameBoardP.length - selectedShip; y < gameBoardP.length; y++) {
+
+                        // if #field100
+                        if (arrayToDivTable(getGizmoLocation()).length == 3) {
+                            var divToChangeIdY = (gameBoardP.length - selectedShip + 1).toString()
+                        } else {
+                            if (arrayToDivTable(getGizmoLocation())[0] > 6 && arrayToDivTable(getGizmoLocation())[1] == "0") {
+                                var divToChangeIdY = (gameBoardP.length - selectedShip + 1).toString()
+                            } else {
+                                var divToChangeIdY = (gameBoardP.length - selectedShip).toString()
+                            }
+                        }
+                        var divToChangeIdX = arrayToDivTable(getGizmoLocation())[1]
+
+                        var divToChangeId = (parseInt(divToChangeIdY + divToChangeIdX) + counter).toString()
+                        let divToChange = document.getElementById(`field${parseInt(divToChangeId)}`)
+                        gameBoardP[y][location.x] = 1;
+                        divToChange.setAttribute("ship", 1);
+                        counter += 10;
+                    }
+                } else {
+
+                    for (let y = location.y; y < location.y + selectedShip; y++) {
+                        y < 0 ? y = 0 : 0
+                        let divToChange = document.getElementById(`field${(parseInt(arrayToDivTable(getGizmoLocation())) + counter).toString()}`)
+                        gameBoardP[y][location.x] = 1;
+                        divToChange.setAttribute("ship", 1);
+                        counter += 10;
+                    }
+                }
+                if (color == "green") {
+                    // Remove ship from avShips
+                    for (let x = 0; x < _availableShips.childElementCount; x++) {
+                        if (_availableShips.children[x].style.backgroundColor == "blue") {
+                            _availableShips.children[x].remove()
+                        }
+                    }
+                    selectedShip = 0;
+                    shipVisualizationOff()
+                } else {
+                    shipVisualizationOn()
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

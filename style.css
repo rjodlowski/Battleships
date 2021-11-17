@@ -1,0 +1,142 @@
+body {
+    margin: 0 auto;
+}
+
+#game {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding-bottom: 1px;
+}
+
+#gameboardsWButton {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#button {
+    width: 100%;
+    height: 40px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#button>button {
+    font-size: 20px;
+}
+
+/* Start of available ships css */
+#availableShips {
+    width: 250px;
+    height: 620px;
+}
+
+.avShip {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    height: 40px;
+    margin: 20px;
+    cursor: pointer;
+}
+
+.avShipCell {
+    height: 40px;
+    width: 40px;
+    outline: 1px solid black;
+    margin-right: 1px;
+}
+
+/* End of available ship css */
+
+#gameBoards {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+}
+
+.title {
+    font-size: 30px;
+    padding: 10px;
+}
+
+/* Start of player css */
+#player {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#playerBoard {
+    width: 400px;
+    height: 405px;
+    cursor: default;
+    padding-top: 2px;
+}
+
+#playerBoard>div {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: none;
+    margin-top: -3px;
+    outline: 1px solid black;
+    cursor: pointer;
+    background-color: white;
+}
+
+/* End of player css */
+
+/* Start of computer css */
+#computer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#computerBoard {
+    width: 400px;
+    height: 405px;
+    cursor: default;
+    padding-top: 2px;
+}
+
+#computerBoard>div {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: none;
+    margin-top: -3px;
+    outline: 1px solid black;
+    cursor: pointer;
+    background-color: white;
+}
+
+/* End of computer css */
+
+
+.xBackground {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url("trafiony.png");
+}
+
+.dotBackground {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url("kropa.png");
+}
+
+.delete {
+    display: none;
+}

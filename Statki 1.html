@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statki cz.1 RJ</title>
+    <style>
+        #game {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 1px;
+        }
+
+        #title {
+            font-size: 30px;
+            padding: 10px;
+        }
+
+        #computerBoard {
+            width: 400px;
+            height: 415px;
+            cursor: default;
+            outline: 2px solid black;
+            padding-top: 2px;
+        }
+
+        #computerBoard>div {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: none;
+            margin-top: -2px;
+            outline: 1px solid black;
+        }
+
+        .ship {
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game">
+        <div id="title">Komputer</div>
+        <div id="computerBoard">
+            <!-- game fields -->
+        </div>
+    </div>
+    <script>
+        // Creating a game board for a computer
+        var gameBoardAI = [];
+        for (let x = 0; x < 10; x++) {
+            gameBoardAI[x] = []
+            for (let y = 0; y < 10; y++) {
+                gameBoardAI[x][y] = 0;
+            }
+        }
+
+        // Declaring avaialble ships
+        var ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+
+        function newCoordsH() {
+            do {
+                var coordsX = Math.floor(Math.random() * 10);
+                var coordsY = Math.floor(Math.random() * 10);
+                console.log("po zmianie", currShip, shipOrientation, coordsY, coordsX);
+                coordsObj = { x: coordsX, y: coordsY }
+            } while (coordsX + currShip > gameBoardAI.length)
+            return coordsObj
+        }
+
+        function newCoordsV() {
+            do {
+                var coordsX = Math.floor(Math.random() * 10);
+                var coordsY = Math.floor(Math.random() * 10);
+                console.log("po zmianie", currShip, shipOrientation, coordsY, coordsX);
+                coordsObj = { x: coordsX, y: coordsY }
+            } while (coordsY + currShip > gameBoardAI.length)
+            return coordsObj
+        }
+
+        // Generating a ship
+        for (var currShipIndex = 0; currShipIndex < ships.length; currShipIndex++) {
+            var canFitShip = false;
+            var currShip = ships[currShipIndex];
+            var broken = true;
+
+            // Setting ship orientation
+            Math.random() >= 0.5 ? shipOrientation = "vertical" : shipOrientation = "horizontal";
+
+            if (shipOrientation == "horizontal") {
+                var coords = newCoordsH();
+                //Do momentu upewnienia się, że statek się zmieści bez obstaclów
+                while (canFitShip == false) {
+                    // Sprawdzanie poprawności dla rzędu nad, właściwego i pod spodem (3)
+                    forek:
+                    for (var y = coords.y - 1; y < coords.y + 2 && y < gameBoardAI.length; y++) {
+                        // górna krawędź
+                        y < 0 ? y++ : 0
+                        for (var x = coords.x - 1; x < coords.x + currShip + 1 && x < gameBoardAI.length; x++) {
+                            // Lewa krawędź 
+                            x < 0 ? x++ : 0
+                            if (gameBoardAI[y][x] == 1) {
+                                console.log("Tutaj jest statek", y, x);
+                                broken = true;
+                                coords = newCoordsH();
+                                break forek;
+                            } else {
+                                broken = false
+                            }
+                        }
+                    }
+                    if (broken == false) {
+                        canFitShip = true;
+                    }
+                }
+
+                // Printowanie shipa do tablicy
+                if (canFitShip) {
+                    for (let a = coords.x; a < coords.x + currShip; a++) {
+                        gameBoardAI[coords.y][a] = 1;
+                    }
+                    console.log("Wpisywany statek:", coords.y, coords.x);
+                }
+
+                // Restart pętli
+                canFitShip = false;
+
+            } else /* shipOrientation == vertical */ {
+                var coords = newCoordsV();
+                // Przechodzi pionowo po liniach 
+                while (canFitShip == false) {
+                    forek:
+                    for (var y = coords.y - 1; y < coords.y + currShip + 1 && y < gameBoardAI.length; y++) {
+                        // Górna krawędź
+                        y < 0 ? y++ : 0
+                        for (var x = coords.x - 1; x < coords.x + 2 && x < gameBoardAI.length; x++) {
+                            // Lewa krawędź
+                            x < 0 ? x++ : 0
+                            if (gameBoardAI[y][x] == 1) {
+                                console.log("Tutaj jest statek", y, x);
+                                broken = true;
+                                coords = newCoordsV();
+                                break forek;
+                            } else {
+                                broken = false
+                            }
+                        }
+                    }
+                    if (broken == false) {
+                        canFitShip = true;
+                    }
+                }
+
+                // Printowanie shipa do tablicy
+                if (canFitShip) {
+                    for (let b = coords.y; b < coords.y + currShip; b++) {
+                        gameBoardAI[b][coords.x] = 1;
+                    }
+                    console.log("Wpisywany statek:", coords.y, coords.x);
+                }
+                canFitShip = false;
+            }
+        }
+        console.table(gameBoardAI)
+
+        // Printing gameBoardAI in the document
+        var gameBoardAIDiv = document.getElementById("computerBoard");
+
+        for (let x = 0; x < gameBoardAI.length; x++) {
+            for (let y = 0; y < gameBoardAI.length; y++) {
+                var field = document.createElement("div")
+                if (gameBoardAI[x][y] == 1) {
+                    field.className = "ship"
+                }
+                gameBoardAIDiv.appendChild(field);
+            }
+        }
+
+    </script>
+</body>
+
+</html>
